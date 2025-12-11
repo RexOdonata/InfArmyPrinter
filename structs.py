@@ -1,7 +1,7 @@
 class profileStruct:
     def __init__(self):
         self.NAME="name"
-        self.CLASS="Line Troops"
+        self.CLASS=""
         self.MOVA="4"
         self.MOVB="4"
         self.CC="17"

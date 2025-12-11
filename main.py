@@ -10,6 +10,10 @@ import resvg_py
 import argparse
 import subprocess
 
+def cm2In(cm):
+
+    return round(cm/2.5)
+
 def stripLogoURL(url):
 
     tokens = url.split('/')
@@ -76,6 +80,7 @@ class processor:
             extraName = extraDict["name"]
 
             if extraDict["type"] == 'DISTANCE':
+                extraName = str(cm2In(float(extraName)))
                 extraName += "\""
 
             extra.append(extraName)
@@ -276,15 +281,12 @@ class processor:
 
         return output
 
-    def createProfile(self, json, factionColor):
+    def createProfile(self, json, factionColor, category):
 
         pData = profileStruct()
 
         pData.NAME = "{" + json["name"] + "}"
         pData.AVA = json["ava"]
-        if pData.AVA == -1:
-            pData.AVA = "--"
-
         pData.BS = json["bs"]
         pData.CC = json["cc"]
         pData.PH = json["ph"]
@@ -292,11 +294,16 @@ class processor:
         pData.SIL = json["s"]
         pData.BTS = json["bts"]
         pData.ARM = json["arm"]
-        pData.MOVA = json["move"][0]
-        pData.MOVB = json["move"][1]
+        pData.MOVA = cm2In(json["move"][0])
+        pData.MOVB = cm2In(json["move"][1])
         pData.WOUNDS = json["w"]
         pData.FACTION = factionColor
         pData.TYPE = self.typeDict[json["type"]]["name"]
+
+        if category is not None and category > 0:
+            pData.CLASS = self.classDict[category]["name"]
+        else:
+            pData.CLass = ""
 
         # Check to see if the icon for this unit is already present, download it if not
         self.checkImg(json["logo"])
@@ -333,6 +340,14 @@ class processor:
 
         equipIDs = json["equip"]
         pData.EQUIP = self.createEquips(equipIDs)
+
+        # replace -1 values with blanks
+
+        vals = [attr for attr in dir(pData) if not callable(attr)]
+
+        for valStr in vals:
+            if getattr(pData, valStr)==-1:
+                setattr(pData,valStr, "--")
 
         return self.profileTemplate(NAME=pData.NAME,
                                     CLASS=pData.CLASS,
@@ -386,6 +401,10 @@ class processor:
         self.peripherals = {}
         self.peripherals = createDictFromArr(jsonData['filters']['peripheral'])
 
+        self.classDict = createDictFromArr(jsonData['filters']['category'])
+
+        self.typeDict = createDictFromArr(jsonData['filters']['type'])
+
         factionName = self.factions[factionID]["name"]
 
         print("Parsing Faction List: " + factionName)
@@ -393,12 +412,6 @@ class processor:
         factionColor = self.getFactionColor(factionID)
 
         tex = ""
-
-        if not self.typeDict:
-
-            self.typeDict = createDictFromArr(jsonData['filters']['type'])
-
-            self.classDict = createDictFromArr(jsonData['filters']['category'])
 
         for unit in jsonData['units']:
 
@@ -412,9 +425,11 @@ class processor:
 
                 troopTex = ""
 
+                category = troop["category"]
+
                 for profileData in troop["profiles"]:
 
-                    profileTex = self.createProfile(profileData, factionColor)
+                    profileTex = self.createProfile(profileData, factionColor, category)
 
                     troopTex += profileTex + "\n"
 
