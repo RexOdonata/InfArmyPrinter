@@ -1,0 +1,45 @@
+\usepackage{etoolbox}
+\usepackage{tabularray}
+
+\makeatletter
+\define@cmdkey{InfFTE}{fteMin}{\def\fteMin{#1}}
+\define@cmdkey{InfFTE}{fteMax}{\def\fteMax{#1}}
+\define@cmdkey{InfFTE}{fteName}{\def\fteName{#1}}
+\define@cmdkey{InfTeam}{teamName}{\def\teamName{#1}}
+\define@cmdkey{InfTeam}{teamTypes}{\def\teamTypes{#1}}
+\makeatother
+
+
+
+\newcommand{\ftContents}{}
+
+\newcommand{\ftEntry}[1][]
+{
+	\setkeys{InfFTE}{#1}
+	
+
+	\eappto{\ftContents}
+	{
+		\fteMin & \fteMax & \fteName \\
+	}
+}
+
+\newcommand{\fireteam}[1][]
+{
+	\begingroup
+			\sffamily
+		\rowcolors{2}{lightgray}{white}
+		\setkeys{InfTeam}{#1}
+		\begin{tabular}[]{ccl}
+			\multicolumn{2}{c}{\teamName} & \teamTypes\\
+			\textbf{Min} & \textbf{Max} & \\
+			\hline
+			\ftContents
+			\hline
+		\end{tabular}
+		\def\ftContents{}
+	\endgroup
+	\def\ftContents{}
+
+	
+}

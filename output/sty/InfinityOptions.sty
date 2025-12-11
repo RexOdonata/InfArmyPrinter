@@ -1,0 +1,103 @@
+\usepackage[table]{xcolor}
+\usepackage{xkeyval}
+\usepackage{array}
+\usepackage{xparse}
+
+
+
+\newcommand{\dimOptNameWidth}{55pt}
+\newcommand{\dimOptSpecialWidth}{120pt}
+\newcommand{\dimOptWeaponWidth}{90pt}
+\newcommand{\dimOptCostWidth}{20pt}
+
+\makeatletter
+\define@cmdkey{InfOption}{oName}{\def\oName{#1}}
+\define@cmdkey{InfOption}{oPoints}{\def\oPoints{#1}}
+\define@cmdkey{InfOption}{oSWC}{\def\oSWC{#1}}
+\define@cmdkey{InfOption}{oSpecial}[empty]{\def\oSpecial{#1}}
+\define@cmdkey{InfOption}{oWeaponRng}[empty]{\def\oWeaponRng{#1}}
+\define@cmdkey{InfOption}{oWeaponMel}[empty]{\def\oWeaponMel{#1}}
+
+\makeatother
+
+\hyphenpenalty=10000
+
+\ExplSyntaxOn
+\NewDocumentCommand{\genRows}{m}
+{
+	\clist_map_inline:Nn {#1}
+	{
+		##1 \vspace{5pt}\\
+	}
+}
+
+\ExplSyntaxOff
+
+
+\NewDocumentCommand{\setSpecialCol}{m}
+{
+	\def\colSpecial
+	{
+		\begin{tabular}[t]{p{\dimOptSpecialWidth}}
+			\genRows{#1}
+		\end{tabular}
+	}
+}
+
+\NewDocumentCommand{\setRangedCol}{m}
+{
+	\def\colRanged
+	{
+		\begin{tabular}[t]{p{\dimOptWeaponWidth}}
+			\genRows{#1}
+		\end{tabular}
+	}
+}
+
+\NewDocumentCommand{\setMeleeCol}{m}
+{
+	\def\colMelee
+	{
+		\begin{tabular}[t]{p{\dimOptWeaponWidth}}
+			\genRows{#1}
+		\end{tabular}
+	}
+}
+
+\newcommand{\header}
+{
+	\footnotesize
+	\sffamily
+	\begin{tabular}[t]		{p{\dimOptNameWidth}p{\dimOptSpecialWidth}p{\dimOptWeaponWidth}p{\dimOptWeaponWidth}p{\dimOptCostWidth}p{\dimOptCostWidth}}
+	\rowcolor{gray}\textbf{\textcolor{white}{Name}} & \textbf{\textcolor{white}{Skills and Equipment}} &   \textbf{\textcolor{white}{Ranged Weapons}} & \textbf{\textcolor{white}{Melee Weapons}} & \textbf{\textcolor{white}{Points}} & \textbf{\textcolor{white}{SWC}}\\
+	\end{tabular}
+
+}
+
+
+\newcommand{\option}[1][]
+{
+	\setkeys{InfOption}{#1}
+	
+	\footnotesize
+	\sffamily
+	
+	\setSpecialCol{\oSpecial}
+	\setMeleeCol{\oWeaponMel}
+	\setRangedCol{\oWeaponRng}
+	
+	
+	\begin{tabular}		{p{\dimOptNameWidth}p{\dimOptSpecialWidth}p{\dimOptWeaponWidth}p{\dimOptWeaponWidth}wc{\dimOptCostWidth}wc{\dimOptCostWidth}}	
+
+			\oName & \colSpecial & \colRanged & \colMelee & \oPoints & \oSWC\\
+		\hline
+	\end{tabular}
+	
+
+}
+
+
+
+	
+
+

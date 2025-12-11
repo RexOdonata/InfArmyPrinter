@@ -1,0 +1,237 @@
+%\NeedsTeXFormat{LaTeX2e}
+%\ProvidesPackage{InfinityPrinter}[Fan-Made Profile Printer for Infinity The Game]
+
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{xparse}
+\usepackage{ifthen}
+\usepackage{xkeyval}
+\usepackage{listofitems}
+\usepackage{multicol}
+\usepackage{pgffor}
+\usepackage{hyphenat}
+\usepackage{silence}
+\usepackage{array}
+\usetikzlibrary{calc}
+\usepgflibrary{shadings}
+\usetikzlibrary{positioning}
+
+\hyphenpenalty=10000
+
+\ErrorFilter{listofitems}{Empty list ignored, nothing to do}
+
+\newcommand{\dimProfileRndCorners}{0.5mm}
+\newcommand{\dimLogoSize}{2.5cm}
+\newcommand{\dimIconSize}{8mm}
+\newcommand{\dimProfileColWidth}{7mm}
+\newcommand{\dimProfileNameWidth}{31mm}
+\newcommand{\dimSpecialWidth}{350pt}
+
+\makeatletter
+
+% PROFILE
+% Profile here refers to everything in common to a unit, it does NOT include options
+
+\define@cmdkey{InfProfile}{pName}{\def\pName{#1}}
+\define@cmdkey{InfProfile}{pMOVa}{\def\pMOVa{#1}}
+\define@cmdkey{InfProfile}{pMOVb}{\def\pMOVb{#1}}
+\define@cmdkey{InfProfile}{pCC}{\def\pCC{#1}}
+\define@cmdkey{InfProfile}{pBS}{\def\pBS{#1}}
+\define@cmdkey{InfProfile}{pPH}{\def\pPH{#1}}
+\define@cmdkey{InfProfile}{pWIP}{\def\pWIP{#1}}
+\define@cmdkey{InfProfile}{pARM}{\def\pARM{#1}}
+\define@cmdkey{InfProfile}{pBTS}{\def\pBTS{#1}}
+\define@cmdkey{InfProfile}{pWounds}{\def\pWounds{#1}}
+\define@cmdkey{InfProfile}{pSIL}{\def\pSIL{#1}}
+\define@cmdkey{InfProfile}{pAVA}{\def\pAVA{#1}}
+\define@cmdkey{InfProfile}{pType}{\def\pType{#1}}
+\define@cmdkey{InfProfile}{pClass}{\def\pClass{#1}}
+\define@cmdkey{InfProfile}{pLogo}{\def\pLogo{#1}}
+\define@cmdkey{InfProfile}{pSkill}[empty]{\def\pSkill{#1}}
+\define@cmdkey{InfProfile}{pEquipment}[empty]{\def\pEquipment{#1}}
+
+\define@choicekey{InfProfile}{pFaction}[\factionCol]
+{YuJing,Ariadna,PanO,Haqqislam,Nomads,CA,Aleph,Tohaa,Mercs,OTwelve,JSA,Cov}
+{
+	\def\pdFaction{\factionCol}%
+}
+\define@cmdkey{InfProfile}{pLogo}{\def\pLogo{#1}}
+\define@choicekey{InfProfile}{pWoundType}[\woundType]{VITA,STR}
+{
+	\def\pdWoundType{\woundType}
+}
+\define@boolkey+{InfProfile}{pHack}
+{
+	\ifKV@InfProfile@pHack
+		\def\pdHackable{\includegraphics[width=\dimIconSize, height=\dimIconSize]{icons/hackable}}
+	\else
+		\def\pdHackable{}
+	\fi
+}
+{
+	\def\pdHackable{}
+}
+\define@boolkey+{InfProfile}{pImpet}
+{
+	\ifKV@InfProfile@pImpet
+		\def\pdImpet{\includegraphics[width=\dimIconSize, height=\dimIconSize]{icons/impetuous}}
+	\else
+		\def\pdImpet{}
+	\fi
+}
+{
+	\def\pdImpet{}
+}
+\define@choicekey{InfProfile}{pCube}[\cubeType]{no,cube,cube2}
+{
+	\ifthenelse{\equal{\cubeType}{cube}}
+		{
+			\def\pdCube{\includegraphics[width=\dimIconSize, height=\dimIconSize]{icons/cube}}}
+		{
+			\ifthenelse{\equal{\cubeType}{no}}
+			{\def\pdCube{}}
+			{\def\pdCube{\includegraphics[width=\dimIconSize, height=\dimIconSize]{icons/cube2}}
+		}}
+}
+\define@choicekey{InfProfile}{pTrain}[\trainType]{none,regular,irregular,peripheral}
+{
+	\ifthenelse{\equal{\trainType}{regular}}
+	{
+		\def\pdTrain{\includegraphics[width=\dimIconSize, height=\dimIconSize]{icons/regular}}
+	}
+	{
+		\ifthenelse{\equal{\trainType}{irregular}}
+		{
+			\def\pdTrain{\includegraphics[width=\dimIconSize, height=\dimIconSize]{icons/irregular}}
+		}
+		{
+			\ifthenelse{\equal{\trainType}{peripheral}}
+			{
+				\def\pdTrain{\includegraphics[width=\dimIconSize, height=\dimIconSize]{icons/peripheral}}
+			}
+			{
+				\def\pdTrain{}
+			}
+		}	
+	}
+}
+
+\makeatother
+
+\setsepchar{,}
+
+\definecolor{YuJing}{RGB}{255,144,0}
+\definecolor{Ariadna}{RGB}{60,124,0}
+\definecolor{PanO}{RGB}{0,176,242}
+\definecolor{Haqqislam}{RGB}{230,218,155}
+\definecolor{Nomads}{RGB}{206,24,31}
+\definecolor{CA}{RGB}{124,14,19}
+\definecolor{Aleph}{RGB}{175,167,188}
+\definecolor{Tohaa}{RGB}{59,59,59}
+\definecolor{Mercs}{RGB}{114,136,104}
+\definecolor{OTwelve}{RGB}{0,84,112}
+\definecolor{JSA}{RGB}{166,17,43}
+\definecolor{Cov}{RGB}{167,87,131}
+
+\def\emptyList{{}}
+
+\newlength{\pWidthVal}
+
+\newcommand{\profile}[1][]
+{
+	\normalsize
+	\setkeys{InfProfile}{#1}
+	
+	
+	\readlist{\skillList}{\pSkill}
+	
+	
+	\readlist{\equipmentList}{\pEquipment}
+	
+
+	\begin{tikzpicture}
+		
+		tikzstyle{every node}=[
+		font=\sffamily
+		];
+		
+		 \node[draw = \pdFaction, line width=1mm , rounded corners = \dimProfileRndCorners] (profilePlate)
+		 {
+			 	\begin{tabular}{wc{\dimProfileColWidth}wc{\dimProfileColWidth}wc{\dimProfileColWidth}wc{\dimProfileColWidth}wc{\dimProfileColWidth}wc{\dimProfileColWidth}wc{\dimProfileColWidth}wc{\dimProfileColWidth}wc{\dimProfileColWidth}wc{\dimProfileColWidth}|wc{\dimProfileColWidth}}
+		\multicolumn{11}{l}{\textbf{\pName}} \\%
+		\multicolumn{11}{l}{\textit{\pClass}} \\%
+		\hline
+		\multicolumn{11}{c}{\vspace{-7pt}} \\
+		\textbf{MOV} & \textbf{CC} & \textbf{BS} & \textbf{PH} & \textbf{WIP} & \textbf{ARM} & \textbf{BTS} & \textbf{\pdWoundType} &  \textbf{S} & \textbf{Type} & \textbf{AVA} \\
+		\pMOVa-\pMOVb & \pCC & \pBS & \pPH & \pWIP & \pARM & \pBTS & \pWounds & \pSIL & \pType & \pAVA \\		 		
+		\end{tabular}
+		 };
+		
+		\node[left = -1mm of profilePlate] (profileLogo) {\includegraphics[width=\dimLogoSize, height=\dimLogoSize]{logo/\pLogo}};
+		
+		\node[above =3mm of profilePlate.north east, anchor=base east] (profileIcons) 
+		{
+
+						\pdHackable 
+						\pdCube
+						\pdTrain
+						\pdImpet
+
+		};
+		
+
+		% This section calculates the width of a profile - comment it back in to see the result
+		%\path let \p1 = ($(profilePlate.east) - (profilePlate.west)$) in
+		%\pgfextra{\xdef\nodewidth{\x1}};
+		%\pgfmathsetlength{\pWidthVal}{\nodewidth-1.5mm}
+		%
+		
+		\node[below = 0.01mm of profilePlate.south] (specialBox)
+		{
+			\begin{minipage}[l]{\dimSpecialWidth}
+		% comment me in to see profile width
+		%\the\pWidthVal
+
+			\ifthenelse{\equal{\skillListlen}{0}}
+			{}
+			{\textbf{Special}: %
+			\foreach \x in {1,...,\skillListlen}
+			{%
+				\ifthenelse{\equal{\skillListlen}{\x}}
+				{%
+					\skillList[\x]%
+				}
+				{%
+					\skillList[\x],%
+				}		
+				}
+			}			
+			\end{minipage}
+		};
+		\node[below = 0.5mm of specialBox] (equipBox)
+		{
+			\begin{minipage}[l]{\dimSpecialWidth}
+			\ifthenelse{\equal{\equipmentListlen}{0}}
+			{}
+			{
+			\textbf{Equipment}: %
+			\foreach \x in {1,...,\equipmentListlen}
+			{%
+				\ifthenelse{\equal{\equipmentListlen}{\x}}
+				{%
+					\equipmentList[\x]%
+				}
+				{%
+					\equipmentList[\x],%
+				}		
+			}
+			}
+
+			\end{minipage}
+		};
+
+		
+		
+	\end{tikzpicture}
+
+}
