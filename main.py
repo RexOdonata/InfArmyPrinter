@@ -115,7 +115,7 @@ class processor:
             equipName = self.equipDict[id]["name"]
 
             if "extra" in equipment:
-                skillName = self.addExtra(equipName, equipment)
+                equipName = self.addExtra(equipName, equipment)
 
             equips.append(equipName)
 
